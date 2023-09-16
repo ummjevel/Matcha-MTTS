@@ -1,7 +1,6 @@
-<<<<<<< HEAD
+
 # Matcha-MTTS
 matcha-tts with multilingual
-=======
 <div align="center">
 
 # Matcha-TTS: A fast TTS architecture with conditional flow matching
@@ -173,4 +172,4 @@ Other source codes I would like to acknowledge:
 - [Coqui-TTS](https://github.com/coqui-ai/TTS/tree/dev)
 - [Grad-TTS](https://github.com/huawei-noah/Speech-Backbones/tree/main/Grad-TTS)
 - [torchdyn](https://github.com/DiffEqML/torchdyn)
->>>>>>> f016784 (Initial commit)
+
