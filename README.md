@@ -3,7 +3,7 @@
 matcha-tts with multilingual
 <div align="center">
 
-# Matcha-TTS: A fast TTS architecture with conditional flow matching
+# 🍵 Matcha-TTS: A fast TTS architecture with conditional flow matching
 
 ### [Shivam Mehta](https://www.kth.se/profile/smehta), [Ruibo Tu](https://www.kth.se/profile/ruibo), [Jonas Beskow](https://www.kth.se/profile/beskow), [Éva Székely](https://www.kth.se/profile/szekely), and [Gustav Eje Henter](https://people.kth.se/~ghe/)
 
