@@ -61,7 +61,7 @@ matcha-tts --text "<INPUT TEXT>"
 or
 
 ```bash
-matcha-tts_app
+matcha-tts-app
 ```
 
 or open `synthesis.ipynb` on jupyter notebook
