@@ -53,10 +53,7 @@ coverage.xml
 *.py,cover
 .hypothesis/
 .pytest_cache/
-<<<<<<< HEAD
 cover/
-=======
->>>>>>> f016784 (Initial commit)
 
 # Translations
 *.mo
@@ -229,4 +226,8 @@ generator_v1
 g_02500000
 gradio_cached_examples/
 synth_output/
+<<<<<<< HEAD
 >>>>>>> f016784 (Initial commit)
+=======
+/data
+>>>>>>> 7e499df (ljspeech/hificaptain from #99)
