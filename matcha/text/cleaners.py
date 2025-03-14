@@ -21,6 +21,13 @@ from unidecode import unidecode
 critical_logger = logging.getLogger("phonemizer")
 critical_logger.setLevel(logging.CRITICAL)
 
+espeak_language = {
+    "EN" : "en-us",
+    "KR" : "ko",
+    "JP" : "ja",
+    "ZH" : "cmn"
+}
+
 # Intializing the phonemizer globally significantly reduces the speed
 # now the phonemizer is not initialising at every call
 # Might be less flexible, but it is much-much faster
@@ -101,6 +108,34 @@ def transliteration_cleaners(text):
     text = collapse_whitespace(text)
     return text
 
+
+def init_phonemizer(language_code):
+
+    if language_code not in espeak_language.keys():
+        print("Please add new language code in code...")
+        return None
+    else:
+        local_phonemizer = phonemizer.backend.EspeakBackend(
+            language=espeak_language[language_code],
+            preserve_punctuation=True,
+            with_stress=True,
+            language_switch="remove-flags",
+            logger=critical_logger,
+        )
+        return local_phonemizer
+
+
+
+def english_cleaners2_m(text, local_phonemeizer):
+    """Pipeline for English text, including abbreviation expansion. + punctuation + stress"""
+    text = convert_to_ascii(text)
+    text = lowercase(text)
+    text = expand_abbreviations(text)
+    phonemes = local_phonemeizer.phonemize([text], strip=True, njobs=1)[0]
+    # Added in some cases espeak is not removing brackets
+    phonemes = remove_brackets(phonemes)
+    phonemes = collapse_whitespace(phonemes)
+    return phonemes
 
 def english_cleaners2(text):
     """Pipeline for English text, including abbreviation expansion. + punctuation + stress"""

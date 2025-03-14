@@ -42,6 +42,7 @@ class TextMelDataModule(LightningDataModule):
         data_statistics,
         seed,
         load_durations,
+        n_languages,
     ):
         super().__init__()
 
@@ -72,6 +73,7 @@ class TextMelDataModule(LightningDataModule):
             self.hparams.data_statistics,
             self.hparams.seed,
             self.hparams.load_durations,
+            self.hparams.n_languages,
         )
         self.validset = TextMelDataset(  # pylint: disable=attribute-defined-outside-init
             self.hparams.valid_filelist_path,
@@ -88,6 +90,7 @@ class TextMelDataModule(LightningDataModule):
             self.hparams.data_statistics,
             self.hparams.seed,
             self.hparams.load_durations,
+            self.hparams.n_languages,
         )
 
     def train_dataloader(self):
@@ -140,6 +143,7 @@ class TextMelDataset(torch.utils.data.Dataset):
         data_parameters=None,
         seed=None,
         load_durations=False,
+        n_languages=None
     ):
         self.filepaths_and_text = parse_filelist(filelist_path)
         self.n_spks = n_spks
@@ -153,6 +157,7 @@ class TextMelDataset(torch.utils.data.Dataset):
         self.f_min = f_min
         self.f_max = f_max
         self.load_durations = load_durations
+        self.n_languages = n_languages
 
         if data_parameters is not None:
             self.data_parameters = data_parameters
@@ -163,13 +168,24 @@ class TextMelDataset(torch.utils.data.Dataset):
 
     def get_datapoint(self, filepath_and_text):
         if self.n_spks > 1:
-            filepath, spk, text = (
-                filepath_and_text[0],
-                int(filepath_and_text[1]),
-                filepath_and_text[2],
-            )
+            if self.n_languages:
+                filepath, lang, spk, text = (
+                    filepath_and_text[0],
+                    filepath_and_text[1],
+                    int(filepath_and_text[2]),
+                    filepath_and_text[3],
+                )
+            else:
+                filepath, spk, text = (
+                    filepath_and_text[0],
+                    int(filepath_and_text[1]),
+                    filepath_and_text[2],
+                )
         else:
-            filepath, text = filepath_and_text[0], filepath_and_text[1]
+            if self.n_languages:
+                filepath, lang, text = filepath_and_text[0], filepath_and_text[1], filepath_and_text[2]
+            else:
+                filepath, text = filepath_and_text[0], filepath_and_text[1]
             spk = None
 
         text, cleaned_text = self.get_text(text, add_blank=self.add_blank)
@@ -177,7 +193,10 @@ class TextMelDataset(torch.utils.data.Dataset):
 
         durations = self.get_durations(filepath, text) if self.load_durations else None
 
-        return {"x": text, "y": mel, "spk": spk, "filepath": filepath, "x_text": cleaned_text, "durations": durations}
+        if self.n_languages:
+            return {"x": text, "y": mel, "spk": spk, "lang": lang, "filepath": filepath, "x_text": cleaned_text, "durations": durations}
+        else:
+            return {"x": text, "y": mel, "spk": spk, "filepath": filepath, "x_text": cleaned_text, "durations": durations}
 
     def get_durations(self, filepath, text):
         filepath = Path(filepath)

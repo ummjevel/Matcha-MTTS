@@ -36,6 +36,8 @@ class MatchaTTS(BaseLightningClass):  # 🍵
         scheduler=None,
         prior_loss=True,
         use_precomputed_durations=False,
+        n_languages=None,
+        lang_emb_dim=None,
     ):
         super().__init__()
 
@@ -48,9 +50,15 @@ class MatchaTTS(BaseLightningClass):  # 🍵
         self.out_size = out_size
         self.prior_loss = prior_loss
         self.use_precomputed_durations = use_precomputed_durations
+        self.lang_emb_dim = lang_emb_dim
 
         if n_spks > 1:
             self.spk_emb = torch.nn.Embedding(n_spks, spk_emb_dim)
+
+        if n_languages:
+            print("*"*100)
+            print("nlanguage is not NONE...!!!!")
+            self.language_emb = torch.nn.Embedding(n_languages, lang_emb_dim)
 
         self.encoder = TextEncoder(
             encoder.encoder_type,
@@ -59,6 +67,8 @@ class MatchaTTS(BaseLightningClass):  # 🍵
             n_vocab,
             n_spks,
             spk_emb_dim,
+            n_languages,
+            lang_emb_dim,
         )
 
         self.decoder = CFM(
@@ -68,12 +78,14 @@ class MatchaTTS(BaseLightningClass):  # 🍵
             decoder_params=decoder,
             n_spks=n_spks,
             spk_emb_dim=spk_emb_dim,
+            n_languages=n_languages,
+            lang_emb_dim=lang_emb_dim,
         )
 
         self.update_data_statistics(data_statistics)
 
     @torch.inference_mode()
-    def synthesise(self, x, x_lengths, n_timesteps, temperature=1.0, spks=None, length_scale=1.0):
+    def synthesise(self, x, x_lengths, n_timesteps, temperature=1.0, spks=None, lang=None, length_scale=1.0):
         """
         Generates mel-spectrogram from text. Returns:
             1. encoder outputs
@@ -115,6 +127,10 @@ class MatchaTTS(BaseLightningClass):  # 🍵
             # Get speaker embedding
             spks = self.spk_emb(spks.long())
 
+        if self.lang:
+            # Get speaker embedding
+            lang = self.lang_emb(lang)
+
         # Get encoder_outputs `mu_x` and log-scaled token durations `logw`
         mu_x, logw, x_mask = self.encoder(x, x_lengths, spks)
 
@@ -150,7 +166,7 @@ class MatchaTTS(BaseLightningClass):  # 🍵
             "rtf": rtf,
         }
 
-    def forward(self, x, x_lengths, y, y_lengths, spks=None, out_size=None, cond=None, durations=None):
+    def forward(self, x, x_lengths, y, y_lengths, spks=None, lang=None, out_size=None, cond=None, durations=None):
         """
         Computes 3 losses:
             1. duration loss: loss between predicted token durations and those extracted by Monotonic Alignment Search (MAS).
@@ -234,7 +250,7 @@ class MatchaTTS(BaseLightningClass):  # 🍵
         mu_y = mu_y.transpose(1, 2)
 
         # Compute loss of the decoder
-        diff_loss, _ = self.decoder.compute_loss(x1=y, mask=y_mask, mu=mu_y, spks=spks, cond=cond)
+        diff_loss, _ = self.decoder.compute_loss(x1=y, mask=y_mask, mu=mu_y, spks=spks, lang=lang, cond=cond)
 
         if self.prior_loss:
             prior_loss = torch.sum(0.5 * ((y - mu_y) ** 2 + math.log(2 * math.pi)) * y_mask)
