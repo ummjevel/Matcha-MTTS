@@ -50,6 +50,7 @@ class MatchaTTS(BaseLightningClass):  # 🍵
         self.out_size = out_size
         self.prior_loss = prior_loss
         self.use_precomputed_durations = use_precomputed_durations
+        self.n_languages = n_languages
         self.lang_emb_dim = lang_emb_dim
 
         if n_spks > 1:
@@ -58,7 +59,7 @@ class MatchaTTS(BaseLightningClass):  # 🍵
         if n_languages:
             print("*"*100)
             print("nlanguage is not NONE...!!!!")
-            self.language_emb = torch.nn.Embedding(n_languages, lang_emb_dim)
+            self.lang_emb = torch.nn.Embedding(n_languages, lang_emb_dim)
 
         self.encoder = TextEncoder(
             encoder.encoder_type,
@@ -127,12 +128,12 @@ class MatchaTTS(BaseLightningClass):  # 🍵
             # Get speaker embedding
             spks = self.spk_emb(spks.long())
 
-        if self.lang:
+        if self.n_languages:
             # Get speaker embedding
-            lang = self.lang_emb(lang)
+            lang = self.lang_emb(lang.long()) 
 
         # Get encoder_outputs `mu_x` and log-scaled token durations `logw`
-        mu_x, logw, x_mask = self.encoder(x, x_lengths, spks)
+        mu_x, logw, x_mask = self.encoder(x, x_lengths, spks, lang)
 
         w = torch.exp(logw) * x_mask
         w_ceil = torch.ceil(w) * length_scale
@@ -151,7 +152,7 @@ class MatchaTTS(BaseLightningClass):  # 🍵
         encoder_outputs = mu_y[:, :, :y_max_length]
 
         # Generate sample tracing the probability flow
-        decoder_outputs = self.decoder(mu_y, y_mask, n_timesteps, temperature, spks)
+        decoder_outputs = self.decoder(mu_y, y_mask, n_timesteps, temperature, spks, lang)
         decoder_outputs = decoder_outputs[:, :, :y_max_length]
 
         t = (dt.datetime.now() - t).total_seconds()
@@ -191,8 +192,14 @@ class MatchaTTS(BaseLightningClass):  # 🍵
             # Get speaker embedding
             spks = self.spk_emb(spks)
 
+        if self.n_languages:
+            print("*"*10)
+            print(lang)
+            # Get speaker embedding
+            lang = self.lang_emb(lang)
+
         # Get encoder_outputs `mu_x` and log-scaled token durations `logw`
-        mu_x, logw, x_mask = self.encoder(x, x_lengths, spks)
+        mu_x, logw, x_mask = self.encoder(x, x_lengths, spks, lang)
         y_max_length = y.shape[-1]
 
         y_mask = sequence_mask(y_lengths, y_max_length).unsqueeze(1).to(x_mask)

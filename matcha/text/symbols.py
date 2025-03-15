@@ -15,3 +15,7 @@ symbols = [_pad] + list(_punctuation) + list(_letters) + list(_letters_ipa)
 
 # Special symbol ids
 SPACE_ID = symbols.index(" ")
+
+# language maps
+language_id_map = {"EN": 0, 'KR': 1, "ZH": 2, "JP": 3}
+num_languages = len(language_id_map.keys())

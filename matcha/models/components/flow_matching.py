@@ -130,17 +130,17 @@ class BASECFM(torch.nn.Module, ABC):
 
 
 class CFM(BASECFM):
-    def __init__(self, in_channels, out_channel, cfm_params, decoder_params, n_spks=1, spk_emb_dim=64, n_language=None, lang_emb_dim=128):
+    def __init__(self, in_channels, out_channel, cfm_params, decoder_params, n_spks=1, spk_emb_dim=64, n_languages=None, lang_emb_dim=128):
         super().__init__(
             n_feats=in_channels,
             cfm_params=cfm_params,
             n_spks=n_spks,
             spk_emb_dim=spk_emb_dim,
-            n_language=n_language,
+            n_languages=n_languages,
             lang_emb_dim=lang_emb_dim,
         )
 
         in_channels = in_channels + (spk_emb_dim if n_spks > 1 else 0)
-        in_channels = in_channels + (lang_emb_dim if n_language else 0)
+        in_channels = in_channels + (lang_emb_dim if n_languages else 0)
         # Just change the architecture of the estimator here
         self.estimator = Decoder(in_channels=in_channels, out_channels=out_channel, **decoder_params)

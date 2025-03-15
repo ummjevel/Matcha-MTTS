@@ -100,7 +100,7 @@ class TextMelDataModule(LightningDataModule):
             num_workers=self.hparams.num_workers,
             pin_memory=self.hparams.pin_memory,
             shuffle=True,
-            collate_fn=TextMelBatchCollate(self.hparams.n_spks),
+            collate_fn=TextMelBatchCollate(self.hparams.n_spks, self.hparams.n_languages),
         )
 
     def val_dataloader(self):
@@ -110,7 +110,7 @@ class TextMelDataModule(LightningDataModule):
             num_workers=self.hparams.num_workers,
             pin_memory=self.hparams.pin_memory,
             shuffle=False,
-            collate_fn=TextMelBatchCollate(self.hparams.n_spks),
+            collate_fn=TextMelBatchCollate(self.hparams.n_spks, self.hparams.n_languages),
         )
 
     def teardown(self, stage: Optional[str] = None):
@@ -182,14 +182,19 @@ class TextMelDataset(torch.utils.data.Dataset):
                     filepath_and_text[2],
                 )
         else:
+            
             if self.n_languages:
                 filepath, lang, text = filepath_and_text[0], filepath_and_text[1], filepath_and_text[2]
             else:
                 filepath, text = filepath_and_text[0], filepath_and_text[1]
             spk = None
-
+            
         text, cleaned_text = self.get_text(text, add_blank=self.add_blank)
         mel = self.get_mel(filepath)
+
+        if self.n_languages:
+            from text.symbols import language_id_map
+            lang = language_id_map[lang]
 
         durations = self.get_durations(filepath, text) if self.load_durations else None
 
@@ -248,8 +253,9 @@ class TextMelDataset(torch.utils.data.Dataset):
 
 
 class TextMelBatchCollate:
-    def __init__(self, n_spks):
+    def __init__(self, n_spks, n_languages):
         self.n_spks = n_spks
+        self.n_languages = n_languages
 
     def __call__(self, batch):
         B = len(batch)
@@ -264,6 +270,7 @@ class TextMelBatchCollate:
 
         y_lengths, x_lengths = [], []
         spks = []
+        lang = []
         filepaths, x_texts = [], []
         for i, item in enumerate(batch):
             y_, x_ = item["y"], item["x"]
@@ -272,6 +279,7 @@ class TextMelBatchCollate:
             y[i, :, : y_.shape[-1]] = y_
             x[i, : x_.shape[-1]] = x_
             spks.append(item["spk"])
+            lang.append(item["lang"])
             filepaths.append(item["filepath"])
             x_texts.append(item["x_text"])
             if item["durations"] is not None:
@@ -280,6 +288,11 @@ class TextMelBatchCollate:
         y_lengths = torch.tensor(y_lengths, dtype=torch.long)
         x_lengths = torch.tensor(x_lengths, dtype=torch.long)
         spks = torch.tensor(spks, dtype=torch.long) if self.n_spks > 1 else None
+        lang = torch.tensor(lang, dtype=torch.long) if self.n_languages else None
+        print("*"*50)
+        print(lang)
+        print(f"Lang dtype: {lang.dtype}, Lang Shape: {lang.shape}, Lang Values: {lang}")
+        exit(1)
 
         return {
             "x": x,
@@ -287,6 +300,7 @@ class TextMelBatchCollate:
             "y": y,
             "y_lengths": y_lengths,
             "spks": spks,
+            "lang": lang,
             "filepaths": filepaths,
             "x_texts": x_texts,
             "durations": durations if not torch.eq(durations, 0).all() else None,
