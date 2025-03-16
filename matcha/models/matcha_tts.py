@@ -193,10 +193,7 @@ class MatchaTTS(BaseLightningClass):  # 🍵
             spks = self.spk_emb(spks)
 
         if self.n_languages:
-            print("*"*10)
-            print(lang)
-            # Get speaker embedding
-            lang = self.lang_emb(lang)
+            lang = self.lang_emb(lang) 
 
         # Get encoder_outputs `mu_x` and log-scaled token durations `logw`
         mu_x, logw, x_mask = self.encoder(x, x_lengths, spks, lang)

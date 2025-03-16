@@ -289,10 +289,6 @@ class TextMelBatchCollate:
         x_lengths = torch.tensor(x_lengths, dtype=torch.long)
         spks = torch.tensor(spks, dtype=torch.long) if self.n_spks > 1 else None
         lang = torch.tensor(lang, dtype=torch.long) if self.n_languages else None
-        print("*"*50)
-        print(lang)
-        print(f"Lang dtype: {lang.dtype}, Lang Shape: {lang.shape}, Lang Values: {lang}")
-        exit(1)
 
         return {
             "x": x,
