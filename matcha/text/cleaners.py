@@ -39,6 +39,10 @@ global_phonemizer = phonemizer.backend.EspeakBackend(
     logger=critical_logger,
 )
 
+from matcha.text.symbols import language_id_map
+_lang_to_id = {s: i for i, s in enumerate(language_id_map)} # {"EN": 0, 'KR': 1, "ZH": 2, "JP": 3}
+_id_to_lang = {i: s for i, s in enumerate(language_id_map)} # {0: "EN", 1: 'KR', 2: "ZH", 3: "JP"}
+local_phonemizers = []
 
 # Regular expression matching whitespace:
 _whitespace_re = re.compile(r"\s+")
@@ -109,29 +113,49 @@ def transliteration_cleaners(text):
     return text
 
 
-def init_phonemizer(language_code):
+def init_phonemizer():
+    global local_phonemizers
 
-    if language_code not in espeak_language.keys():
+    if local_phonemizers:  # 이미 초기화된 경우 다시 실행하지 않음
+        return
+    
+    # print("Initializing phonemizers...")
+    if len(espeak_language) == 0:
         print("Please add new language code in code...")
-        return None
-    else:
+        assert False
+    
+    for key, language_code in espeak_language.items():
+        # print(language_code)
         local_phonemizer = phonemizer.backend.EspeakBackend(
-            language=espeak_language[language_code],
+            language=language_code,
             preserve_punctuation=True,
             with_stress=True,
             language_switch="remove-flags",
             logger=critical_logger,
         )
-        return local_phonemizer
+        local_phonemizers.append(local_phonemizer)
 
-
-
-def english_cleaners2_m(text, local_phonemeizer):
+def english_cleaners2_m(text, language_code): # "hi, glad to meet you", "EN"
+    global local_phonemizers
     """Pipeline for English text, including abbreviation expansion. + punctuation + stress"""
     text = convert_to_ascii(text)
     text = lowercase(text)
     text = expand_abbreviations(text)
+
+    if not local_phonemizers:
+        init_phonemizer()
+
+    if language_code not in _lang_to_id:
+        raise ValueError(f"Invalid language code: {language_code}. Available: {_lang_to_id.keys()}")
+
+    lang_id = _lang_to_id[language_code]
+
+    if lang_id >= len(local_phonemizers):
+        raise IndexError(f"Phonemizer index {lang_id} out of range for local_phonemizers (size={len(local_phonemizers)})")
+
+    local_phonemeizer = local_phonemizers[lang_id]
     phonemes = local_phonemeizer.phonemize([text], strip=True, njobs=1)[0]
+
     # Added in some cases espeak is not removing brackets
     phonemes = remove_brackets(phonemes)
     phonemes = collapse_whitespace(phonemes)

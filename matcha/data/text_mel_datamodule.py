@@ -182,19 +182,20 @@ class TextMelDataset(torch.utils.data.Dataset):
                     filepath_and_text[2],
                 )
         else:
-            
             if self.n_languages:
                 filepath, lang, text = filepath_and_text[0], filepath_and_text[1], filepath_and_text[2]
             else:
                 filepath, text = filepath_and_text[0], filepath_and_text[1]
             spk = None
-            
-        text, cleaned_text = self.get_text(text, add_blank=self.add_blank)
-        mel = self.get_mel(filepath)
-
+        
         if self.n_languages:
-            from text.symbols import language_id_map
+            from matcha.text.symbols import language_id_map
+            text, cleaned_text = self.get_text(text, add_blank=self.add_blank, language_code=lang)
             lang = language_id_map[lang]
+        else:
+            text, cleaned_text = self.get_text(text, add_blank=self.add_blank)
+        
+        mel = self.get_mel(filepath)
 
         durations = self.get_durations(filepath, text) if self.load_durations else None
 
@@ -234,11 +235,12 @@ class TextMelDataset(torch.utils.data.Dataset):
             self.f_max,
             center=False,
         ).squeeze()
+        
         mel = normalize(mel, self.data_parameters["mel_mean"], self.data_parameters["mel_std"])
         return mel
 
-    def get_text(self, text, add_blank=True):
-        text_norm, cleaned_text = text_to_sequence(text, self.cleaners)
+    def get_text(self, text, add_blank=True, language_code=None):
+        text_norm, cleaned_text = text_to_sequence(text, self.cleaners, language_code=language_code)
         if self.add_blank:
             text_norm = intersperse(text_norm, 0)
         text_norm = torch.IntTensor(text_norm)
@@ -276,6 +278,11 @@ class TextMelBatchCollate:
             y_, x_ = item["y"], item["x"]
             y_lengths.append(y_.shape[-1])
             x_lengths.append(x_.shape[-1])
+            if y_.dim() == 3:
+                print(y_.shape)
+                print(i)
+                print(item)
+                exit(1)
             y[i, :, : y_.shape[-1]] = y_
             x[i, : x_.shape[-1]] = x_
             spks.append(item["spk"])
