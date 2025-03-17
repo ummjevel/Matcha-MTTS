@@ -170,7 +170,7 @@ class TextMelDataset(torch.utils.data.Dataset):
         if self.n_spks > 1:
             if self.n_languages:
                 filepath, lang, spk, text = (
-                    filepath_and_text[0],
+                    filepath_and_text[0], # 
                     filepath_and_text[1],
                     int(filepath_and_text[2]),
                     filepath_and_text[3],

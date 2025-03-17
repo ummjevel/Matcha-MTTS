@@ -2,19 +2,26 @@ _target_: lightning.pytorch.trainer.Trainer
 
 default_root_dir: ${paths.output_dir}
 
-max_epochs: -1
+# max_epochs: -1
+max_steps: 500000
 
 accelerator: gpu
-devices: [0]
+strategy: ddp
+num_nodes: 1
+devices: [0,1,2,3]
+plugins: 
+  - _target_: lightning.pytorch.plugins.environments.TorchElasticEnvironment
 
 # mixed precision for extra speed-up
 precision: 16-mixed
 
 # perform a validation loop every N training epochs
-check_val_every_n_epoch: 1
+check_val_every_n_epoch: 10
 
 # set True to to ensure deterministic results
 # makes training slower but gives more reproducibility than just setting seeds
 deterministic: False
 
 gradient_clip_val: 5.0
+
+# torchrun --nproc_per_node 4 --nnodes  1 --rdzv_backend static --rdzv_endpoint localhost:29515 --max_restarts 0 --master_port 49881 matcha/train.py experiment=ljs_kss_multilingual

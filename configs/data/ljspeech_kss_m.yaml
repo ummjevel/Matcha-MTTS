@@ -3,12 +3,11 @@ name: ljspeech
 train_filelist_path: data/filelists/ljs_kss_audio_text_train_filelist_ml.txt
 valid_filelist_path: data/filelists/ljs_kss_audio_text_val_filelist_ml.txt
 batch_size: 32
-num_workers: 20
+num_workers: 32
 pin_memory: True
 cleaners: [english_cleaners2_m]
 add_blank: True
-n_spks: 1
-n_languages: 2  # EN, KO
+n_spks: 2
 n_fft: 1024
 n_feats: 80
 sample_rate: 22050
@@ -21,3 +20,4 @@ data_statistics:
   mel_std: 2.1637821197509766
 seed: ${seed}
 load_durations: false
+n_languages: 2  # EN, KO
