@@ -17,6 +17,8 @@ from matcha.models.matcha_tts import MatchaTTS
 from matcha.text import sequence_to_text, text_to_sequence
 from matcha.utils.utils import assert_model_downloaded, get_user_data_dir, intersperse
 
+from matcha.utils.eval_utils import evaluate_whisper
+
 MATCHA_URLS = {
     "matcha_ljspeech": "https://github.com/shivammehta25/Matcha-TTS-checkpoints/releases/download/v1.0/matcha_ljspeech.ckpt",
     "matcha_vctk": "https://github.com/shivammehta25/Matcha-TTS-checkpoints/releases/download/v1.0/matcha_vctk.ckpt",
@@ -125,7 +127,7 @@ def to_waveform(mel, vocoder, denoiser=None, denoiser_strength=0.00025):
 def save_to_folder(filename: str, output: dict, folder: str):
     folder = Path(folder)
     folder.mkdir(exist_ok=True, parents=True)
-    plot_spectrogram_to_numpy(np.array(output["mel"].squeeze().float().cpu()), f"{filename}.png")
+    plot_spectrogram_to_numpy(np.array(output["mel"].squeeze().float().cpu()), folder / f"{filename}.png")
     np.save(folder / f"{filename}", output["mel"].cpu().numpy())
     sf.write(folder / f"{filename}.wav", output["waveform"], 22050, "PCM_24")
     return folder.resolve() / f"{filename}.wav"
@@ -264,6 +266,10 @@ def cli():
     parser.add_argument(
         "--batch_size", type=int, default=32, help="Batch size only useful when --batched (default: 32)"
     )
+    parser.add_argument("--whisper", default=None, type=str, help="set the language code in [ko, en]")
+    # todo
+    # parser.add_argument("--pesq", action="store_true", help="PESQ with neural network model (default: False)")
+    # parser.add_argument("--sim", action="store_true", help="Similarity with WavLM SV model (default: False)")
 
     args = parser.parse_args()
 
@@ -281,12 +287,18 @@ def cli():
     vocoder, denoiser = load_vocoder(args.vocoder, paths["vocoder"], device)
 
     texts = get_texts(args)
+    print(f"[🍵] Get texts : {len(texts)}")
 
     spk = torch.tensor([args.spk], device=device, dtype=torch.long) if args.spk is not None else None
-    if len(texts) == 1 or not args.batched:
-        unbatched_synthesis(args, device, model, vocoder, denoiser, texts, spk)
-    else:
-        batched_synthesis(args, device, model, vocoder, denoiser, texts, spk)
+    # if len(texts) == 1 or not args.batched:
+    #     unbatched_synthesis(args, device, model, vocoder, denoiser, texts, spk)
+    # else:
+    #     batched_synthesis(args, device, model, vocoder, denoiser, texts, spk)
+
+    if args.whisper == "ko":
+        evaluate_whisper(args.output_folder, texts, model_size="medium", device=device, metric_type="cer", language="ko")
+    elif args.whisper == "en":
+        evaluate_whisper(args.output_folder, texts, model_size="medium", device=device, metric_type="wer", language="en")
 
 
 class BatchedSynthesisDataset(torch.utils.data.Dataset):
