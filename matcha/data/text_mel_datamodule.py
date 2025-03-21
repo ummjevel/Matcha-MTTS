@@ -42,7 +42,7 @@ class TextMelDataModule(LightningDataModule):
         data_statistics,
         seed,
         load_durations,
-        n_languages,
+        n_languages=None,
     ):
         super().__init__()
 
