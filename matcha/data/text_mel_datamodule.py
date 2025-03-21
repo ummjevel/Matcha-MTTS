@@ -186,6 +186,7 @@ class TextMelDataset(torch.utils.data.Dataset):
                 filepath, lang, text = filepath_and_text[0], filepath_and_text[1], filepath_and_text[2]
             else:
                 filepath, text = filepath_and_text[0], filepath_and_text[1]
+                
             spk = None
         
         if self.n_languages:
@@ -194,7 +195,7 @@ class TextMelDataset(torch.utils.data.Dataset):
             lang = language_id_map[lang]
         else:
             text, cleaned_text = self.get_text(text, add_blank=self.add_blank)
-        
+            lang = None
         mel = self.get_mel(filepath)
 
         durations = self.get_durations(filepath, text) if self.load_durations else None
@@ -202,7 +203,7 @@ class TextMelDataset(torch.utils.data.Dataset):
         if self.n_languages:
             return {"x": text, "y": mel, "spk": spk, "lang": lang, "filepath": filepath, "x_text": cleaned_text, "durations": durations}
         else:
-            return {"x": text, "y": mel, "spk": spk, "filepath": filepath, "x_text": cleaned_text, "durations": durations}
+            return {"x": text, "y": mel, "spk": spk, "lang": lang, "filepath": filepath, "x_text": cleaned_text, "durations": durations}
 
     def get_durations(self, filepath, text):
         filepath = Path(filepath)
@@ -274,6 +275,7 @@ class TextMelBatchCollate:
         spks = []
         lang = []
         filepaths, x_texts = [], []
+
         for i, item in enumerate(batch):
             y_, x_ = item["y"], item["x"]
             y_lengths.append(y_.shape[-1])
@@ -291,6 +293,7 @@ class TextMelBatchCollate:
             x_texts.append(item["x_text"])
             if item["durations"] is not None:
                 durations[i, : item["durations"].shape[-1]] = item["durations"]
+    
 
         y_lengths = torch.tensor(y_lengths, dtype=torch.long)
         x_lengths = torch.tensor(x_lengths, dtype=torch.long)
