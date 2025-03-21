@@ -39,6 +39,14 @@ global_phonemizer = phonemizer.backend.EspeakBackend(
     logger=critical_logger,
 )
 
+korean_phonemizer = phonemizer.backend.EspeakBackend(
+    language="ko",
+    preserve_punctuation=True,
+    with_stress=True,
+    language_switch="remove-flags",
+    logger=critical_logger,
+)
+
 from matcha.text.symbols import language_id_map
 _lang_to_id = {s: i for i, s in enumerate(language_id_map)} # {"EN": 0, 'KR': 1, "ZH": 2, "JP": 3}
 _id_to_lang = {i: s for i, s in enumerate(language_id_map)} # {0: "EN", 1: 'KR', 2: "ZH", 3: "JP"}
@@ -172,6 +180,13 @@ def english_cleaners2(text):
     phonemes = collapse_whitespace(phonemes)
     return phonemes
 
+
+def korean_cleaners(text):
+    phonemes = korean_phonemizer.phonemize([text], strip=True, njobs=1)[0]
+    # Added in some cases espeak is not removing brackets
+    phonemes = remove_brackets(phonemes)
+    phonemes = collapse_whitespace(phonemes)
+    return phonemes
 
 def ipa_simplifier(text):
     replacements = [
