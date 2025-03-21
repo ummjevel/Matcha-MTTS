@@ -43,6 +43,7 @@ class TextMelDataModule(LightningDataModule):
         seed,
         load_durations,
         n_languages=None,
+        diff_gtp=False,
     ):
         super().__init__()
 
@@ -74,6 +75,7 @@ class TextMelDataModule(LightningDataModule):
             self.hparams.seed,
             self.hparams.load_durations,
             self.hparams.n_languages,
+            self.hparams.diff_gtp,
         )
         self.validset = TextMelDataset(  # pylint: disable=attribute-defined-outside-init
             self.hparams.valid_filelist_path,
@@ -91,6 +93,7 @@ class TextMelDataModule(LightningDataModule):
             self.hparams.seed,
             self.hparams.load_durations,
             self.hparams.n_languages,
+            self.hparams.diff_gtp,
         )
 
     def train_dataloader(self):
@@ -143,7 +146,8 @@ class TextMelDataset(torch.utils.data.Dataset):
         data_parameters=None,
         seed=None,
         load_durations=False,
-        n_languages=None
+        n_languages=None,
+        diff_gtp=False,
     ):
         self.filepaths_and_text = parse_filelist(filelist_path)
         self.n_spks = n_spks
@@ -158,6 +162,7 @@ class TextMelDataset(torch.utils.data.Dataset):
         self.f_max = f_max
         self.load_durations = load_durations
         self.n_languages = n_languages
+        self.diff_gtp = diff_gtp
 
         if data_parameters is not None:
             self.data_parameters = data_parameters
@@ -191,7 +196,7 @@ class TextMelDataset(torch.utils.data.Dataset):
         
         if self.n_languages:
             from matcha.text.symbols import language_id_map
-            text, cleaned_text = self.get_text(text, add_blank=self.add_blank, language_code=lang)
+            text, cleaned_text = self.get_text(text, add_blank=self.add_blank, language_code=lang, diff_gtp=self.diff_gtp)
             lang = language_id_map[lang]
         else:
             text, cleaned_text = self.get_text(text, add_blank=self.add_blank)
@@ -240,8 +245,8 @@ class TextMelDataset(torch.utils.data.Dataset):
         mel = normalize(mel, self.data_parameters["mel_mean"], self.data_parameters["mel_std"])
         return mel
 
-    def get_text(self, text, add_blank=True, language_code=None):
-        text_norm, cleaned_text = text_to_sequence(text, self.cleaners, language_code=language_code)
+    def get_text(self, text, add_blank=True, language_code=None, diff_gtp=False):
+        text_norm, cleaned_text = text_to_sequence(text, self.cleaners, language_code=language_code, diff_gtp=diff_gtp)
         if self.add_blank:
             text_norm = intersperse(text_norm, 0)
         text_norm = torch.IntTensor(text_norm)

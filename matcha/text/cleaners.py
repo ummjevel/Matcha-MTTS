@@ -17,6 +17,8 @@ import re
 import phonemizer
 from unidecode import unidecode
 
+from matcha.text.korean import latin_to_hangul, number_to_hangul, divide_hangul, g2pk
+
 # To avoid excessive logging we set the log level of the phonemizer package to Critical
 critical_logger = logging.getLogger("phonemizer")
 critical_logger.setLevel(logging.CRITICAL)
@@ -178,15 +180,28 @@ def english_cleaners2(text):
     # Added in some cases espeak is not removing brackets
     phonemes = remove_brackets(phonemes)
     phonemes = collapse_whitespace(phonemes)
+    
     return phonemes
 
 
-def korean_cleaners(text):
+def korean_simple_cleaners(text):
     phonemes = korean_phonemizer.phonemize([text], strip=True, njobs=1)[0]
     # Added in some cases espeak is not removing brackets
     phonemes = remove_brackets(phonemes)
     phonemes = collapse_whitespace(phonemes)
     return phonemes
+
+
+def korean_cleaners(text):
+    '''Pipeline for Korean text'''
+    text = latin_to_hangul(text)
+    text = number_to_hangul(text)
+    text = g2pk(text)
+    text = divide_hangul(text)
+    text = re.sub(r'([\u3131-\u3163])$', r'\1.', text)
+    
+    return text
+
 
 def ipa_simplifier(text):
     replacements = [

@@ -1,0 +1,19 @@
+# @package _global_
+
+# to execute this experiment run:
+# python train.py experiment=multispeaker
+
+defaults:
+  - override /data: ljspeech_kss_m_jamo.yaml
+  - override /model: matcha_ml_jamo.yaml
+
+# all parameters below will be merged with parameters from default configurations set above
+# this allows you to overwrite only specified parameters
+
+tags: ["ljs_kss_ml_jamo"]
+
+run_name: ljs_kss_ml_jamo
+
+
+model:
+  out_size: 172

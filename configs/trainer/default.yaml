@@ -8,7 +8,7 @@ max_steps: 500000
 accelerator: gpu
 strategy: ddp
 num_nodes: 1
-devices: [0,1,2,3]
+devices: [4,5,6,7]
 plugins: 
   - _target_: lightning.pytorch.plugins.environments.TorchElasticEnvironment
 

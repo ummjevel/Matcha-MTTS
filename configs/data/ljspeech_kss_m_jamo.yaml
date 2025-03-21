@@ -1,0 +1,24 @@
+_target_: matcha.data.text_mel_datamodule.TextMelDataModule
+name: ljs_kss_m_jamo
+train_filelist_path: data/filelists/ljs_kss_audio_text_train_filelist_ml.txt
+valid_filelist_path: data/filelists/ljs_kss_audio_text_val_filelist_ml.txt
+batch_size: 32
+num_workers: 16
+pin_memory: True
+cleaners: [english_cleaners2, korean_cleaners]
+add_blank: True
+n_spks: 2
+n_fft: 1024
+n_feats: 80
+sample_rate: 22050
+hop_length: 256
+win_length: 1024
+f_min: 0
+f_max: 8000
+data_statistics:  
+  mel_mean: -5.619250297546387
+  mel_std: 2.1637821197509766
+seed: ${seed}
+load_durations: false
+n_languages: 2  # EN, KO
+diff_gtp: True

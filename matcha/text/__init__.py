@@ -11,7 +11,7 @@ class UnknownCleanerException(Exception):
     pass
 
 
-def text_to_sequence(text, cleaner_names, language_code=None):
+def text_to_sequence(text, cleaner_names, language_code=None, diff_gtp=False):
     """Converts a string of text to a sequence of IDs corresponding to the symbols in the text.
     Args:
       text: string to convert to a sequence
@@ -21,7 +21,7 @@ def text_to_sequence(text, cleaner_names, language_code=None):
     """
     sequence = []
 
-    if language_code:
+    if language_code and not diff_gtp:
         clean_text = _clean_text_ml(text, cleaner_names[0], language_code)
         for symbol in clean_text:
             symbol_id = _symbol_to_id[symbol]

@@ -5,7 +5,7 @@ valid_filelist_path: data/filelists/kss_audio_text_val_filelist_ml.txt
 batch_size: 32
 num_workers: 20
 pin_memory: True
-cleaners: [korean_cleaners]
+cleaners: [korean_simple_cleaners]
 add_blank: True
 n_spks: 1
 n_languages: null
