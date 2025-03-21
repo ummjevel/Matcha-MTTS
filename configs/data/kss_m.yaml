@@ -5,7 +5,7 @@ valid_filelist_path: data/filelists/kss_audio_text_val_filelist_ml.txt
 batch_size: 32
 num_workers: 20
 pin_memory: True
-cleaners: [english_cleaners2]
+cleaners: [english_cleaners2_m]
 add_blank: True
 n_spks: 1
 n_languages: 2 # EN, KO
@@ -17,7 +17,7 @@ win_length: 1024
 f_min: 0
 f_max: 8000
 data_statistics:  # Computed for ljspeech dataset
-  mel_mean: -5.536622
-  mel_std: 2.116101
+  mel_mean: -5.8669962882995605
+  mel_std: 2.369321823120117
 seed: ${seed}
 load_durations: false

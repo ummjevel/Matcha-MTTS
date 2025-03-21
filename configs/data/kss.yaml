@@ -1,13 +1,13 @@
 _target_: matcha.data.text_mel_datamodule.TextMelDataModule
 name: ljspeech
-train_filelist_path: data/filelists/ljs_kss_audio_text_train_filelist_ml.txt
-valid_filelist_path: data/filelists/ljs_kss_audio_text_val_filelist_ml.txt
+train_filelist_path: data/filelists/ljs_audio_text_train_filelist.txt
+valid_filelist_path: data/filelists/ljs_audio_text_val_filelist.txt
 batch_size: 32
-num_workers: 16
+num_workers: 20
 pin_memory: True
 cleaners: [english_cleaners2_m]
 add_blank: True
-n_spks: 2
+n_spks: 1
 n_fft: 1024
 n_feats: 80
 sample_rate: 22050
@@ -15,9 +15,8 @@ hop_length: 256
 win_length: 1024
 f_min: 0
 f_max: 8000
-data_statistics:  
-  mel_mean: -5.619250297546387
-  mel_std: 2.1637821197509766
+data_statistics:  # Computed for ljspeech dataset
+  mel_mean: -5.8669962882995605
+  mel_std: 2.369321823120117
 seed: ${seed}
 load_durations: false
-n_languages: 2  # EN, KO

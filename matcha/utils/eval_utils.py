@@ -7,6 +7,7 @@ import json
 import torch.multiprocessing as mp
 from tqdm import tqdm
 from jamo import h2j, j2hcj
+import string
 
 BATCH_SIZE = 32  # 한 번에 처리할 오디오 파일 개수
 NUM_WORKERS = 4  # 병렬 처리할 프로세스 개수
