@@ -1,13 +1,13 @@
 _target_: matcha.data.text_mel_datamodule.TextMelDataModule
 name: kss
-train_filelist_path: data/filelists/kss_audio_text_train_filelist_ml.txt
-valid_filelist_path: data/filelists/kss_audio_text_val_filelist_ml.txt
-batch_size: 1
+train_filelist_path: data/filelists/kss_audio_text_train_filelist_ml_ms.txt
+valid_filelist_path: data/filelists/kss_audio_text_val_filelist_ml_ms.txt
+batch_size: 32
 num_workers: 20
 pin_memory: True
 cleaners: [english_cleaners2_m]
 add_blank: True
-n_spks: 1
+n_spks: 2
 n_languages: 2 # EN, KO
 n_fft: 1024
 n_feats: 80

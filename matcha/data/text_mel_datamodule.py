@@ -200,10 +200,10 @@ class TextMelDataset(torch.utils.data.Dataset):
 
         durations = self.get_durations(filepath, text) if self.load_durations else None
 
-        if self.n_languages:
-            return {"x": text, "y": mel, "spk": spk, "lang": lang, "filepath": filepath, "x_text": cleaned_text, "durations": durations}
-        else:
-            return {"x": text, "y": mel, "spk": spk, "lang": lang, "filepath": filepath, "x_text": cleaned_text, "durations": durations}
+        # if self.n_languages:
+        return {"x": text, "y": mel, "spk": spk, "lang": lang, "filepath": filepath, "x_text": cleaned_text, "durations": durations}
+        # else:
+        #     return {"x": text, "y": mel, "spk": spk, "filepath": filepath, "x_text": cleaned_text, "durations": durations}
 
     def get_durations(self, filepath, text):
         filepath = Path(filepath)
