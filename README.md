@@ -1,8 +1,8 @@
 <div align="center">
 
-# 🍵 Matcha-TTS: A fast TTS architecture with conditional flow matching
+# 🍵 Matcha-MTTS: A fast Multilingual TTS architecture with conditional flow matching
 
-### [Shivam Mehta](https://www.kth.se/profile/smehta), [Ruibo Tu](https://www.kth.se/profile/ruibo), [Jonas Beskow](https://www.kth.se/profile/beskow), [Éva Székely](https://www.kth.se/profile/szekely), and [Gustav Eje Henter](https://people.kth.se/~ghe/)
+### FROM Matcha-TTS
 
 [![python](https://img.shields.io/badge/-Python_3.10-blue?logo=python&logoColor=white)](https://www.python.org/downloads/release/python-3100/)
 [![pytorch](https://img.shields.io/badge/PyTorch_2.0+-ee4c2c?logo=pytorch&logoColor=white)](https://pytorch.org/get-started/locally/)
@@ -11,26 +11,55 @@
 [![black](https://img.shields.io/badge/Code%20Style-Black-black.svg?labelColor=gray)](https://black.readthedocs.io/en/stable/)
 [![isort](https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat&labelColor=ef8336)](https://pycqa.github.io/isort/)
 
-<p style="text-align: center;">
-  <img src="https://shivammehta25.github.io/Matcha-TTS/images/logo.png" height="128"/>
-</p>
-
 </div>
 
-> This is the official code implementation of 🍵 Matcha-TTS [ICASSP 2024].
+> This code based on the official code implementation of 🍵 Matcha-TTS [ICASSP 2024].
 
-We propose 🍵 Matcha-TTS, a new approach to non-autoregressive neural TTS, that uses [conditional flow matching](https://arxiv.org/abs/2210.02747) (similar to [rectified flows](https://arxiv.org/abs/2209.03003)) to speed up ODE-based speech synthesis. Our method:
-
-- Is probabilistic
-- Has compact memory footprint
-- Sounds highly natural
-- Is very fast to synthesise from
-
-Check out our [demo page](https://shivammehta25.github.io/Matcha-TTS) and read [our arXiv preprint](https://arxiv.org/abs/2309.03199) for more details.
+Check out their [demo page](https://shivammehta25.github.io/Matcha-TTS) and read [our arXiv preprint](https://arxiv.org/abs/2309.03199) for more details.
 
 [Pre-trained models](https://drive.google.com/drive/folders/17C_gYgEHOxI5ZypcfE_k1piKCtyR0isJ?usp=sharing) will be automatically downloaded with the CLI or gradio interface.
 
 [Try 🍵 Matcha-TTS on HuggingFace 🤗 spaces!](https://huggingface.co/spaces/shivammehta25/Matcha-TTS)
+
+
+
+## Multilingual Support
+
+Just adding language code in the architecture.
+
+if you want to train with LJSpeech(EN), KSS(KO) dataset, use this :
+```bash
+python matcha/train.py experiment=ljs_kss_multilingual_jamo
+```
+
+at first, i used espeak-ng only, but the korean jamo's pronunciation is more accurate for me.
+i recommend use jamo when train korean.
+
+if you want to eval model-english and korean with whisper medium model-to get the WER / CER, use this:
+```bash
+
+matcha-tts --file "english test file" --output_folder "output folder path" --whisper en --checkpoint_path "checkpoint path" --vocoder hifigan_univ_v1 --spk 0 --lang 0
+
+matcha-tts --file "korean test file" --output_folder "output folder path" --whisper ko --checkpoint_path "checkpoint path" --vocoder hifigan_univ_v1 --spk 1 --lang 1
+
+```
+
+this is multilingual experiments(LJS with espeak, KSS with jamo) results
+
+: loss, alignments and metrics results...
+
+
+EN WER : use vctk test 500 texts, 0.03472
+
+EN RTF : acoustic 0.0632 ± 0.04447, with vocoder 0.0879 ± 0.06554
+
+KO CER : use chatgpt generated 50 texts, 
+
+KO RTF : 
+
+
+
+now i am thinking about training with larger dataset with 2 language(EN, KO).
 
 ## Installation
 
@@ -282,6 +311,7 @@ Example: `ljspeech.yaml`
 load_durations: True
 ```
 or see an examples in configs/experiment/ljspeech_from_durations.yaml
+
 
 
 ## Citation information

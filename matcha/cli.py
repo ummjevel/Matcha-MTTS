@@ -18,6 +18,7 @@ from matcha.text import sequence_to_text, text_to_sequence
 from matcha.utils.utils import assert_model_downloaded, get_user_data_dir, intersperse
 
 from matcha.utils.eval_utils import evaluate_whisper
+from typing import Optional
 
 MATCHA_URLS = {
     "matcha_ljspeech": "https://github.com/shivammehta25/Matcha-TTS-checkpoints/releases/download/v1.0/matcha_ljspeech.ckpt",
@@ -47,13 +48,21 @@ def plot_spectrogram_to_numpy(spectrogram, filename):
     plt.savefig(filename)
 
 
-def process_text(i: int, text: str, device: torch.device):
+def process_text(i: int, text: str, device: torch.device, lang: Optional[int]):
     print(f"[{i}] - Input text: {text}")
-    x = torch.tensor(
-        intersperse(text_to_sequence(text, ["english_cleaners2"])[0], 0),
-        dtype=torch.long,
-        device=device,
-    )[None]
+    if lang == 1:
+        x = torch.tensor(
+            intersperse(text_to_sequence(text, ["korean_cleaners"])[0], 0),
+            dtype=torch.long,
+            device=device,
+        )[None]
+    else:
+        x = torch.tensor(
+            intersperse(text_to_sequence(text, ["english_cleaners2"])[0], 0),
+            dtype=torch.long,
+            device=device,
+        )[None]
+    
     x_lengths = torch.tensor([x.shape[-1]], dtype=torch.long, device=device)
     x_phones = sequence_to_text(x.squeeze(0).tolist())
     print(f"[{i}] - Phonetised text: {x_phones[1::2]}")
@@ -380,7 +389,7 @@ def unbatched_synthesis(args, device, model, vocoder, denoiser, texts, spk, lang
 
         print("".join(["="] * 100))
         text = text.strip()
-        text_processed = process_text(i, text, device)
+        text_processed = process_text(i, text, device, lang)
 
         print(f"[🍵] Whisking Matcha-T(ea)TS for: {i}")
         start_t = dt.datetime.now()
