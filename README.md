@@ -17,7 +17,7 @@
 
 Check out their [demo page](https://shivammehta25.github.io/Matcha-TTS) and read [our arXiv preprint](https://arxiv.org/abs/2309.03199) for more details.
 
-[Pre-trained models](https://drive.google.com/drive/folders/17C_gYgEHOxI5ZypcfE_k1piKCtyR0isJ?usp=sharing) will be automatically downloaded with the CLI or gradio interface.
+[Original Pre-trained models](https://drive.google.com/drive/folders/17C_gYgEHOxI5ZypcfE_k1piKCtyR0isJ?usp=sharing) will be automatically downloaded with the CLI or gradio interface.
 
 [Try 🍵 Matcha-TTS on HuggingFace 🤗 spaces!](https://huggingface.co/spaces/shivammehta25/Matcha-TTS)
 
@@ -47,6 +47,10 @@ matcha-tts --file "korean test file" --output_folder "output folder path" --whis
 this is multilingual experiments(LJS with espeak, KSS with jamo) results
 
 : loss, alignments and metrics results...
+
+![ma_img0](https://github.com/user-attachments/assets/f625bd7e-7c04-420a-b8a8-36616da85ed3)
+![ma_img1](https://github.com/user-attachments/assets/a0bbaee2-6109-46b8-863f-b16b7f79314b)
+![ma_img2](https://github.com/user-attachments/assets/24730c78-4d75-4cfe-87f4-f2b7ef1ee012)
 
 
 EN WER : use vctk test 500 texts, 0.03472
